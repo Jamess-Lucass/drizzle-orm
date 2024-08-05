@@ -70,12 +70,13 @@ export type BuildInsertSchema<
 	TRefine extends Refine<TTable, 'insert'> | {},
 	TNoOptional extends boolean = false,
 > = TTable['_']['columns'] extends infer TColumns extends Record<string, Column<any>> ? {
-		[K in keyof TColumns & string]: MaybeOptional<
-			TColumns[K],
-			(K extends keyof TRefine ? Assume<UnwrapValueOrUpdater<TRefine[K]>, z.ZodTypeAny>
-				: GetZodType<TColumns[K]>),
-			'insert',
-			TNoOptional
+		[K in keyof TColumns & string]: K extends keyof TRefine 
+			? Assume<UnwrapValueOrUpdater<TRefine[K]>, z.ZodTypeAny>
+			: MaybeOptional<
+				TColumns[K],
+				GetZodType<TColumns[K]>,
+				'insert',
+				TNoOptional
 		>;
 	}
 	: never;
@@ -133,10 +134,12 @@ export function createInsertSchema<
 	}
 
 	for (const [name, column] of columnEntries) {
-		if (!column.notNull) {
-			schemaEntries[name] = schemaEntries[name]!.nullable().optional();
-		} else if (column.hasDefault) {
-			schemaEntries[name] = schemaEntries[name]!.optional();
+		if (!(refine && name in refine)) {
+			if (!column.notNull) {
+				schemaEntries[name] = schemaEntries[name]!.nullable().optional();
+			} else if (column.hasDefault) {
+				schemaEntries[name] = schemaEntries[name]!.optional();
+			}
 		}
 	}
 

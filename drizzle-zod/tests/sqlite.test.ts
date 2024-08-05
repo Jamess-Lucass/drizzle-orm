@@ -70,7 +70,7 @@ test('users insert schema', (t) => {
 	});
 
 	const expected = z.object({
-		id: z.number().positive().optional(),
+		id: z.number().positive(),
 		blobJson: blobJsonSchema,
 		blobBigInt: z.bigint(),
 		numeric: z.string(),
@@ -79,7 +79,7 @@ test('users insert schema', (t) => {
 		boolean: z.boolean(),
 		real: z.number(),
 		text: z.string().nullable().optional(),
-		role: z.enum(['admin', 'manager', 'user']).optional(),
+		role: z.enum(['admin', 'manager', 'user']),
 	});
 
 	expectSchemaShape(t, expected).from(actual);

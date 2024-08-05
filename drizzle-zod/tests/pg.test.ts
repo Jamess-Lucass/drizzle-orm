@@ -79,7 +79,7 @@ test('users insert schema', (t) => {
 
 	const expected = z.object({
 		a: z.array(z.number()).nullable().optional(),
-		id: z.number().positive().optional(),
+		id: z.number().positive(),
 		name: z.string().nullable().optional(),
 		email: z.string().email(),
 		birthdayString: z.string(),
@@ -115,6 +115,29 @@ test('users insert schema w/ defaults', (t) => {
 
 	expectSchemaShape(t, expected).from(actual);
 });
+
+test('users insert w/ overriding optional', (t) => {
+  const actual = createInsertSchema(users, {
+    name: z.string().min(3)
+  });
+
+	const expected = z.object({
+		a: z.array(z.number()).nullable().optional(),
+		id: z.number().optional(),
+		name: z.string().min(3),
+		email: z.string(),
+		birthdayString: z.string(),
+		birthdayDate: z.date(),
+		createdAt: z.date().optional(),
+		role: z.enum(['admin', 'user']),
+		roleText: z.enum(['admin', 'user']),
+		roleText2: z.enum(['admin', 'user']).optional(),
+		profession: z.string().max(20).min(1),
+		initials: z.string().max(2).min(1),
+	});
+
+	expectSchemaShape(t, expected).from(actual);
+})
 
 test('users select schema', (t) => {
 	const actual = createSelectSchema(users, {
